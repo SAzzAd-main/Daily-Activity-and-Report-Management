@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+
+{% block title %}Habit Tracker - Daily Tracker{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">Habit Tracker</h2>
+        <p class="text-muted mb-0">Build good habits, break bad ones</p>
+    </div>
+    <a href="{% url 'habit_create' %}" class="btn btn-primary fw-semibold">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg me-1" viewBox="0 0 16 16">
+          <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2Z"/>
+        </svg>
+        Add Habit
+    </a>
+</div>
+
+<div class="row g-4">
+    <!-- Good Habits Column -->
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-success bg-opacity-10 border-0 py-3">
+                <h5 class="card-title fw-bold text-success mb-0 d-flex align-items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-plus-circle-fill me-2" viewBox="0 0 16 16">
+                      <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h-3a.5.5 0 0 0 0-1h3v-3z"/>
+                    </svg>
+                    Good Habits
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    {% int_good_count = 0 %}
+                    {% for habit in habits %}
+                        {% if habit.habit_type == 'GOOD' %}
+                            <div class="list-group-item p-3 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="fw-bold mb-1 {% if habit.id in completed_today %}text-decoration-line-through text-muted{% endif %}">
+                                        {{ habit.name }}
+                                    </h6>
+                                    <span class="small text-warning fw-medium">
+                                        🔥 {{ habit.streak }} day{{ habit.streak|pluralize }} streak
+                                    </span>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <a href="{% url 'habit_toggle' habit.id %}" class="btn btn-sm {% if habit.id in completed_today %}btn-success{% else %}btn-outline-success{% endif %} fw-semibold px-3">
+                                        {% if habit.id in completed_today %}
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-lg me-1" viewBox="0 0 16 16">
+                                              <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022Z"/>
+                                            </svg>
+                                            Done
+                                        {% else %}
+                                            Mark Done
+                                        {% endif %}
+                                    </a>
+                                    <a href="{% url 'habit_delete' habit.id %}" class="btn btn-sm btn-outline-danger border-0" title="Delete">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                                          <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6Z"/>
+                                          <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1ZM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118ZM2.5 3h11V2h-11v1Z"/>
+                                        </svg>
+                                    </a>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% empty %}
+                        <div class="text-center py-4 text-muted small">
+                            No good habits added yet.
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bad Habits Column -->
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-danger bg-opacity-10 border-0 py-3">
+                <h5 class="card-title fw-bold text-danger mb-0 d-flex align-items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-dash-circle-fill me-2" viewBox="0 0 16 16">
+                      <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM4.5 7.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5z"/>
+                    </svg>
+                    Bad Habits (Avoid Them!)
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    {% for habit in habits %}
+                        {% if habit.habit_type == 'BAD' %}
+                            <div class="list-group-item p-3 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="fw-bold mb-1 {% if habit.id in completed_today %}text-decoration-line-through text-muted{% endif %}">
+                                        {{ habit.name }}
+                                    </h6>
+                                    <span class="small text-warning fw-medium">
+                                        🔥 {{ habit.streak }} day{{ habit.streak|pluralize }} avoided
+                                    </span>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <a href="{% url 'habit_toggle' habit.id %}" class="btn btn-sm {% if habit.id in completed_today %}btn-success{% else %}btn-outline-danger{% endif %} fw-semibold px-3">
+                                        {% if habit.id in completed_today %}
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-shield-fill-check me-1" viewBox="0 0 16 16">
+                                              <path d="M8 0c-.69 0-1.843.265-2.928.56-1.11.3-2.229.655-2.887.87a1.54 1.54 0 0 0-1.044 1.262c-.596 4.477.787 7.795 2.465 9.99a11.775 11.775 0 0 0 5.247 3.79.48.48 0 0 0 .374 0 11.76 11.76 0 0 0 5.248-3.79c1.679-2.195 3.061-5.513 2.466-9.99a1.54 1.54 0 0 0-1.044-1.263 62.439 62.439 0 0 0-2.887-.87C9.843.266 8.69 0 8 0zm2.146 5.146a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L7.5 7.793l2.646-2.647a.5.5 0 0 1 .708 0z"/>
+                                            </svg>
+                                            Avoided
+                                        {% else %}
+                                            Avoided Today
+                                        {% endif %}
+                                    </a>
+                                    <a href="{% url 'habit_delete' habit.id %}" class="btn btn-sm btn-outline-danger border-0" title="Delete">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                                          <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6Z"/>
+                                          <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1ZM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118ZM2.5 3h11V2h-11v1Z"/>
+                                        </svg>
+                                    </a>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% empty %}
+                        <div class="text-center py-4 text-muted small">
+                            No bad habits added yet.
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

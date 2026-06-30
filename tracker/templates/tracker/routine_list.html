@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}Routine Planner - Daily Tracker{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">Daily Routine Planner</h2>
+        <p class="text-muted mb-0">Plan and structure your ideal day</p>
+    </div>
+    <a href="{% url 'routine_create' %}" class="btn btn-primary fw-semibold">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg me-1" viewBox="0 0 16 16">
+          <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2Z"/>
+        </svg>
+        Add Routine
+    </a>
+</div>
+
+{% if not routines %}
+    <div class="card border-0 shadow-sm text-center py-5">
+        <div class="card-body">
+            <div class="text-muted mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-calendar-x" viewBox="0 0 16 16">
+                  <path d="M6.146 7.146a.5.5 0 0 1 .708 0L8 8.293l1.146-1.147a.5.5 0 1 1 .708.708L8.707 9l1.147 1.146a.5.5 0 0 1-.708.708L8 9.707l-1.146 1.147a.5.5 0 0 1-.708-.708L7.293 9 6.146 7.854a.5.5 0 0 1 0-.708z"/>
+                  <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/>
+                </svg>
+            </div>
+            <h4 class="fw-bold">No routines planned</h4>
+            <p class="text-muted">You haven't set up any routine items for today yet.</p>
+            <a href="{% url 'routine_create' %}" class="btn btn-outline-primary fw-semibold btn-sm mt-2">Get Started</a>
+        </div>
+    </div>
+{% else %}
+    <div class="card border-0 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 50px;">Status</th>
+                        <th>Time</th>
+                        <th>Routine Task</th>
+                        <th>Category</th>
+                        <th>Priority</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for routine in routines %}
+                        <tr class="{% if routine.is_completed %}table-light text-muted{% endif %}">
+                            <td>
+                                <a href="{% url 'routine_toggle' routine.id %}" class="btn btn-sm btn-link text-decoration-none p-0">
+                                    {% if routine.is_completed %}
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-check-circle-fill text-success" viewBox="0 0 16 16">
+                                          <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                                        </svg>
+                                    {% else %}
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-circle text-secondary" viewBox="0 0 16 16">
+                                          <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                        </svg>
+                                    {% endif %}
+                                </a>
+                            </td>
+                            <td class="fw-semibold text-nowrap">
+                                {{ routine.start_time|time:"h:i A" }} - {{ routine.end_time|time:"h:i A" }}
+                            </td>
+                            <td>
+                                <span class="{% if routine.is_completed %}text-decoration-line-through{% endif %} fw-medium">
+                                    {{ routine.title }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge rounded-pill 
+                                    {% if routine.category == 'WORK' %}bg-primary-subtle text-primary
+                                    {% elif routine.category == 'HEALTH' %}bg-success-subtle text-success
+                                    {% elif routine.category == 'EDUCATION' %}bg-info-subtle text-info
+                                    {% elif routine.category == 'LEISURE' %}bg-warning-subtle text-warning
+                                    {% else %}bg-secondary-subtle text-secondary{% endif %} px-2.5 py-1">
+                                    {{ routine.get_category_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge rounded-pill 
+                                    {% if routine.priority == 'HIGH' %}bg-danger-subtle text-danger
+                                    {% elif routine.priority == 'MEDIUM' %}bg-warning-subtle text-warning
+                                    {% else %}bg-secondary-subtle text-secondary{% endif %} px-2.5 py-1">
+                                    {{ routine.get_priority_display }}
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <a href="{% url 'routine_edit' routine.id %}" class="btn btn-sm btn-outline-secondary border-0 me-1" title="Edit">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil" viewBox="0 0 16 16">
+                                      <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
+                                    </svg>
+                                </a>
+                                <a href="{% url 'routine_delete' routine.id %}" class="btn btn-sm btn-outline-danger border-0" title="Delete">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                                      <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6Z"/>
+                                      <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1ZM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118ZM2.5 3h11V2h-11v1Z"/>
+                                    </svg>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}
