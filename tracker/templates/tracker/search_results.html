@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+
+{% block title %}Search Results - Daily Tracker{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h2 class="fw-bold mb-1">Search Results</h2>
+    {% if query %}
+        <p class="text-muted mb-0">Showing results for "<strong class="text-dark">{{ query }}</strong>"</p>
+    {% else %}
+        <p class="text-muted mb-0">Enter a keyword to search across activities, habits, and tasks.</p>
+    {% endif %}
+</div>
+
+<!-- Search Form -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body p-4">
+        <form method="GET" action="{% url 'search_results' %}">
+            <div class="input-group">
+                <input type="text" name="q" class="form-control form-control-lg" placeholder="Search by title, category, date (YYYY-MM-DD)..." value="{{ query }}">
+                <button type="submit" class="btn btn-primary px-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                      <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+                    </svg>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if query %}
+    <!-- Activities Section -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white border-0 py-3">
+            <h5 class="fw-bold mb-0">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-activity me-2 text-primary" viewBox="0 0 16 16">
+                  <path fill-rule="evenodd" d="M6 2a.5.5 0 0 1 .47.33L10 12.036l1.53-4.208A.5.5 0 0 1 12 7.5h3.5a.5.5 0 0 1 0 1h-3.15l-1.88 5.17a.5.5 0 0 1-.94 0L6 3.964 4.47 8.171A.5.5 0 0 1 4 8.5H.5a.5.5 0 0 1 0-1h3.15l1.88-5.17A.5.5 0 0 1 6 2Z"/>
+                </svg>
+                Activities
+                <span class="badge bg-primary-subtle text-primary ms-2">{{ activities.count }}</span>
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            {% if activities %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Title</th>
+                                <th>Category</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Score</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for activity in activities %}
+                                <tr>
+                                    <td class="fw-medium">{{ activity.title }}</td>
+                                    <td><span class="badge bg-secondary-subtle text-secondary">{{ activity.get_category_display }}</span></td>
+                                    <td>{{ activity.date|date:"M d, Y" }}</td>
+                                    <td class="text-nowrap">{{ activity.start_time|time:"h:i A" }} - {{ activity.end_time|time:"h:i A" }}</td>
+                                    <td>{{ activity.productivity_score }}/10</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-4 text-muted small">No matching activities found.</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Habits Section -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white border-0 py-3">
+            <h5 class="fw-bold mb-0">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-lightning-fill me-2 text-warning" viewBox="0 0 16 16">
+                  <path d="M5.52.359A.5.5 0 0 1 6 0h4a.5.5 0 0 1 .474.658L8.694 6H12.5a.5.5 0 0 1 .395.807l-7 9a.5.5 0 0 1-.873-.454L6.823 9.5H3.5a.5.5 0 0 1-.48-.641l2.5-8.5z"/>
+                </svg>
+                Habits
+                <span class="badge bg-warning-subtle text-warning ms-2">{{ habits.count }}</span>
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            {% if habits %}
+                <div class="list-group list-group-flush">
+                    {% for habit in habits %}
+                        <div class="list-group-item p-3 d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="fw-bold mb-0">{{ habit.name }}</h6>
+                                <span class="small text-muted">{{ habit.get_habit_type_display }} &middot; 🔥 {{ habit.streak }} day{{ habit.streak|pluralize }} streak</span>
+                            </div>
+                            <span class="badge {% if habit.habit_type == 'GOOD' %}bg-success-subtle text-success{% else %}bg-danger-subtle text-danger{% endif %} px-2 py-1">
+                                {{ habit.get_habit_type_display }}
+                            </span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-4 text-muted small">No matching habits found.</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Todos Section -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white border-0 py-3">
+            <h5 class="fw-bold mb-0">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-check2-square me-2 text-info" viewBox="0 0 16 16">
+                  <path d="M3 14.5A1.5 1.5 0 0 1 1.5 13V3A1.5 1.5 0 0 1 3 1.5h8a.5.5 0 0 1 0 1H3a.5.5 0 0 0-.5.5v10a.5.5 0 0 0 .5.5h10a.5.5 0 0 0 .5-.5V8a.5.5 0 0 1 1 0v5a1.5 1.5 0 0 1-1.5 1.5H3z"/>
+                  <path d="m8.354 10.354 7-7a.5.5 0 0 0-.708-.708L8 9.293 5.354 6.646a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0z"/>
+                </svg>
+                Tasks
+                <span class="badge bg-info-subtle text-info ms-2">{{ todos.count }}</span>
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            {% if todos %}
+                <div class="list-group list-group-flush">
+                    {% for todo in todos %}
+                        <div class="list-group-item p-3 d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="fw-medium {% if todo.is_completed %}text-decoration-line-through text-muted{% endif %}">{{ todo.title }}</span>
+                                {% if todo.due_date %}
+                                    <span class="small text-muted d-block">Due {{ todo.due_date|date:"M d, Y" }}</span>
+                                {% endif %}
+                            </div>
+                            <span class="badge 
+                                {% if todo.priority == 'HIGH' %}bg-danger-subtle text-danger
+                                {% elif todo.priority == 'MEDIUM' %}bg-warning-subtle text-warning
+                                {% else %}bg-secondary-subtle text-secondary{% endif %} px-2 py-1">
+                                {{ todo.get_priority_display }}
+                            </span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-4 text-muted small">No matching tasks found.</div>
+            {% endif %}
+        </div>
+    </div>
+{% endif %}
+{% endblock %}

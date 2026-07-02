@@ -80,7 +80,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'daily_tracker_db',
         'USER': 'postgres',
-        'PASSWORD': 'newOne#',  # CHANGE THIS to your actual PostgreSQL password
+        'PASSWORD': 'newOne#',  
         'HOST': '127.0.0.1',
         'PORT': '5432',
     }
