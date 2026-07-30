@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+
+{% block title %}Weekly Report - Daily Tracker{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">Weekly Report</h2>
+        <p class="text-muted mb-0">{{ week_start|date:"M d" }} — {{ today|date:"M d, Y" }}</p>
+    </div>
+    <a href="{% url 'monthly_report' %}" class="btn btn-outline-primary fw-semibold btn-sm">View Monthly Report →</a>
+</div>
+
+<!-- Summary Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-lg-3">
+        <div class="card border-0 shadow-sm text-center p-3">
+            <div class="fw-bold fs-3 text-primary">{{ completed_activities }}</div>
+            <div class="text-muted small">Completed Activities</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card border-0 shadow-sm text-center p-3">
+            <div class="fw-bold fs-3 text-warning">{{ pending_activities }}</div>
+            <div class="text-muted small">Pending Activities</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card border-0 shadow-sm text-center p-3">
+            <div class="fw-bold fs-3 text-success">{{ avg_productivity }}/10</div>
+            <div class="text-muted small">Avg Productivity</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card border-0 shadow-sm text-center p-3">
+            <div class="fw-bold fs-3 text-info">{{ total_hours }}h</div>
+            <div class="text-muted small">Total Working Hours</div>
+        </div>
+    </div>
+</div>
+
+<!-- Additional Stats -->
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-lg-4">
+        <div class="card border-0 shadow-sm text-center p-3">
+            <div class="fw-bold fs-3 text-danger">{{ completed_todos }}</div>
+            <div class="text-muted small">Tasks Completed</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-4">
+        <div class="card border-0 shadow-sm text-center p-3">
+            <div class="fw-bold fs-3 text-secondary">{{ pending_todos }}</div>
+            <div class="text-muted small">Tasks Pending</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-4">
+        <div class="card border-0 shadow-sm text-center p-3">
+            <div class="fw-bold fs-3 text-success">{{ habit_rate }}%</div>
+            <div class="text-muted small">Habit Completion ({{ week_habit_logs }}/{{ possible_habits }})</div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row g-4 mb-4">
+    <!-- Daily Productivity Chart -->
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 py-3">
+                <h5 class="fw-bold mb-0">📈 Daily Productivity Score</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="productivityChart" height="280"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Breakdown -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 py-3">
+                <h5 class="fw-bold mb-0">🕐 Time by Category</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="categoryChart" height="280"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Working Hours Chart -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white border-0 py-3">
+        <h5 class="fw-bold mb-0">⏱️ Daily Working Hours</h5>
+    </div>
+    <div class="card-body">
+        <canvas id="hoursChart" height="200"></canvas>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    // Productivity Line Chart
+    const prodCtx = document.getElementById('productivityChart').getContext('2d');
+    new Chart(prodCtx, {
+        type: 'line',
+        data: {
+            labels: {{ daily_labels|safe }},
+            datasets: [{
+                label: 'Productivity Score',
+                data: {{ daily_scores|safe }},
+                borderColor: 'rgb(102, 126, 234)',
+                backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: 'rgb(102, 126, 234)',
+                pointRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, max: 10, title: { display: true, text: 'Score' } }
+            }
+        }
+    });
+
+    // Category Doughnut Chart
+    const catCtx = document.getElementById('categoryChart').getContext('2d');
+    const catLabels = {{ cat_labels|safe }};
+    const catValues = {{ cat_values|safe }};
+    
+    if (catLabels.length > 0) {
+        new Chart(catCtx, {
+            type: 'doughnut',
+            data: {
+                labels: catLabels,
+                datasets: [{
+                    data: catValues,
+                    backgroundColor: [
+                        'rgba(54, 162, 235, 0.8)',
+                        'rgba(75, 192, 192, 0.8)',
+                        'rgba(255, 206, 86, 0.8)',
+                        'rgba(255, 99, 132, 0.8)',
+                        'rgba(153, 102, 255, 0.8)',
+                        'rgba(255, 159, 64, 0.8)',
+                        'rgba(201, 203, 207, 0.8)'
+                    ],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom', labels: { boxWidth: 12, padding: 10 } }
+                }
+            }
+        });
+    } else {
+        document.getElementById('categoryChart').parentElement.innerHTML = '<p class="text-center text-muted py-4">No data available yet.</p>';
+    }
+
+    // Working Hours Bar Chart
+    const hoursCtx = document.getElementById('hoursChart').getContext('2d');
+    new Chart(hoursCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ daily_labels|safe }},
+            datasets: [{
+                label: 'Hours',
+                data: {{ daily_hours|safe }},
+                backgroundColor: 'rgba(75, 192, 192, 0.7)',
+                borderColor: 'rgb(75, 192, 192)',
+                borderWidth: 1,
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, title: { display: true, text: 'Hours' } }
+            }
+        }
+    });
+</script>
+{% endblock %}

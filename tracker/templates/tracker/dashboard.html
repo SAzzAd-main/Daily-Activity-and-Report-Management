@@ -1,0 +1,259 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Daily Tracker{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stat-card {
+        border: none;
+        border-radius: 12px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.1) !important;
+    }
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .stat-value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+    .welcome-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 16px;
+        color: white;
+        padding: 2rem 2.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Welcome Section -->
+<div class="welcome-section shadow-sm mb-4">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <h2 class="fw-bold mb-1">Welcome back, {{ user.first_name|default:user.username }}! 👋</h2>
+            <p class="mb-0 opacity-75">Here is your productivity snapshot for today.</p>
+        </div>
+        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+            <span class="fw-semibold opacity-75">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-calendar3 me-2" viewBox="0 0 16 16">
+                  <path d="M14 0H2a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zM1 3.857C1 3.384 1.448 3 2 3h12c.552 0 1 .384 1 .857v10.286c0 .473-.448.857-1 .857H2c-.552 0-1-.384-1-.857V3.857z"/>
+                </svg>
+                {% now "l, F d, Y" %}
+            </span>
+        </div>
+    </div>
+</div>
+
+<!-- Today's Summary Cards -->
+<div class="row g-3 mb-4">
+    <!-- Routines Card -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="card stat-card shadow-sm h-100">
+            <div class="card-body p-3">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div class="stat-icon bg-primary bg-opacity-10">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-calendar-check text-primary" viewBox="0 0 16 16">
+                          <path d="M10.854 7.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L7.5 9.793l2.646-2.647a.5.5 0 0 1 .708 0z"/>
+                          <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/>
+                        </svg>
+                    </div>
+                    <a href="{% url 'routine_list' %}" class="text-decoration-none small text-muted">View →</a>
+                </div>
+                <div class="stat-value text-primary">{{ today_routines_completed }}/{{ today_routines_total }}</div>
+                <div class="text-muted small fw-medium">Routines Done</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Activities Card -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="card stat-card shadow-sm h-100">
+            <div class="card-body p-3">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div class="stat-icon bg-success bg-opacity-10">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-activity text-success" viewBox="0 0 16 16">
+                          <path fill-rule="evenodd" d="M6 2a.5.5 0 0 1 .47.33L10 12.036l1.53-4.208A.5.5 0 0 1 12 7.5h3.5a.5.5 0 0 1 0 1h-3.15l-1.88 5.17a.5.5 0 0 1-.94 0L6 3.964 4.47 8.171A.5.5 0 0 1 4 8.5H.5a.5.5 0 0 1 0-1h3.15l1.88-5.17A.5.5 0 0 1 6 2Z"/>
+                        </svg>
+                    </div>
+                    <a href="{% url 'activity_list' %}" class="text-decoration-none small text-muted">View →</a>
+                </div>
+                <div class="stat-value text-success">{{ today_activities_count }}</div>
+                <div class="text-muted small fw-medium">Activities Logged Today</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Habits Card -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="card stat-card shadow-sm h-100">
+            <div class="card-body p-3">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div class="stat-icon bg-warning bg-opacity-10">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-lightning-fill text-warning" viewBox="0 0 16 16">
+                          <path d="M5.52.359A.5.5 0 0 1 6 0h4a.5.5 0 0 1 .474.658L8.694 6H12.5a.5.5 0 0 1 .395.807l-7 9a.5.5 0 0 1-.873-.454L6.823 9.5H3.5a.5.5 0 0 1-.48-.641l2.5-8.5z"/>
+                        </svg>
+                    </div>
+                    <a href="{% url 'habit_list' %}" class="text-decoration-none small text-muted">View →</a>
+                </div>
+                <div class="stat-value text-warning">{{ today_habits_completed }}/{{ today_habits_total }}</div>
+                <div class="text-muted small fw-medium">Habits Completed</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Todos Card -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="card stat-card shadow-sm h-100">
+            <div class="card-body p-3">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div class="stat-icon bg-info bg-opacity-10">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-check2-square text-info" viewBox="0 0 16 16">
+                          <path d="M3 14.5A1.5 1.5 0 0 1 1.5 13V3A1.5 1.5 0 0 1 3 1.5h8a.5.5 0 0 1 0 1H3a.5.5 0 0 0-.5.5v10a.5.5 0 0 0 .5.5h10a.5.5 0 0 0 .5-.5V8a.5.5 0 0 1 1 0v5a1.5 1.5 0 0 1-1.5 1.5H3z"/>
+                          <path d="m8.354 10.354 7-7a.5.5 0 0 0-.708-.708L8 9.293 5.354 6.646a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0z"/>
+                        </svg>
+                    </div>
+                    <a href="{% url 'todo_list' %}" class="text-decoration-none small text-muted">View →</a>
+                </div>
+                <div class="stat-value text-info">{{ today_todos_pending }}</div>
+                <div class="text-muted small fw-medium">Tasks Pending</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Left Column: Weekly Summary + Recent Activities -->
+    <div class="col-lg-8">
+        <!-- Weekly Summary -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-0 py-3">
+                <h5 class="fw-bold mb-0">📊 Weekly Summary (Last 7 Days)</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-6 col-md-3 text-center">
+                        <div class="fw-bold fs-4 text-primary">{{ week_activity_count }}</div>
+                        <div class="text-muted small">Activities</div>
+                    </div>
+                    <div class="col-6 col-md-3 text-center">
+                        <div class="fw-bold fs-4 text-success">{{ week_avg_productivity }}/10</div>
+                        <div class="text-muted small">Avg Productivity</div>
+                    </div>
+                    <div class="col-6 col-md-3 text-center">
+                        <div class="fw-bold fs-4 text-warning">{{ week_total_hours }}h</div>
+                        <div class="text-muted small">Working Hours</div>
+                    </div>
+                    <div class="col-6 col-md-3 text-center">
+                        <div class="fw-bold fs-4 text-info">{{ week_habit_rate }}%</div>
+                        <div class="text-muted small">Habit Completion</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activities -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0">🕑 Recent Activities</h5>
+                <a href="{% url 'activity_list' %}" class="text-decoration-none small">View All →</a>
+            </div>
+            <div class="card-body p-0">
+                {% if recent_activities %}
+                    <div class="list-group list-group-flush">
+                        {% for activity in recent_activities %}
+                            <div class="list-group-item p-3">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="fw-bold mb-1">{{ activity.title }}</h6>
+                                        <span class="small text-muted">
+                                            {{ activity.date|date:"M d" }} &middot;
+                                            {{ activity.start_time|time:"h:i A" }} - {{ activity.end_time|time:"h:i A" }}
+                                        </span>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="badge 
+                                            {% if activity.category == 'WORK' %}bg-primary-subtle text-primary
+                                            {% elif activity.category == 'HEALTH' %}bg-success-subtle text-success
+                                            {% elif activity.category == 'EDUCATION' %}bg-info-subtle text-info
+                                            {% elif activity.category == 'LEISURE' %}bg-warning-subtle text-warning
+                                            {% elif activity.category == 'SOCIAL_MEDIA' %}bg-danger-subtle text-danger
+                                            {% else %}bg-secondary-subtle text-secondary{% endif %} px-2 py-1">
+                                            {{ activity.get_category_display }}
+                                        </span>
+                                        <div class="small text-muted mt-1">Score: {{ activity.productivity_score }}/10</div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-4 text-muted small">
+                        No activities logged yet. <a href="{% url 'activity_create' %}">Log your first activity!</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Notifications -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 py-3">
+                <h5 class="fw-bold mb-0">🔔 Notifications</h5>
+            </div>
+            <div class="card-body p-0">
+                {% if notifications %}
+                    <div class="list-group list-group-flush">
+                        {% for notif in notifications %}
+                            <div class="list-group-item p-3 border-start border-4 
+                                {% if notif.type == 'danger' %}border-danger
+                                {% elif notif.type == 'warning' %}border-warning
+                                {% elif notif.type == 'info' %}border-info
+                                {% else %}border-secondary{% endif %}">
+                                <span class="small">{{ notif.message }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <div class="text-success mb-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
+                              <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                            </svg>
+                        </div>
+                        <span class="small text-muted">All caught up! No pending items.</span>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card border-0 shadow-sm mt-4">
+            <div class="card-header bg-white border-0 py-3">
+                <h5 class="fw-bold mb-0">⚡ Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'activity_create' %}" class="btn btn-outline-success btn-sm fw-semibold">Log Activity</a>
+                    <a href="{% url 'routine_create' %}" class="btn btn-outline-primary btn-sm fw-semibold">Add Routine</a>
+                    <a href="{% url 'habit_create' %}" class="btn btn-outline-warning btn-sm fw-semibold">Add Habit</a>
+                    <a href="{% url 'todo_create' %}" class="btn btn-outline-info btn-sm fw-semibold">Add Task</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}Improvement Suggestions - Daily Tracker{% endblock %}
+
+{% block extra_css %}
+<style>
+    .insight-card {
+        border: none;
+        border-left: 4px solid;
+        border-radius: 8px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .insight-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.08) !important;
+    }
+    .insight-card.border-success { border-left-color: #198754; }
+    .insight-card.border-warning { border-left-color: #ffc107; }
+    .insight-card.border-danger { border-left-color: #dc3545; }
+    .insight-card.border-info { border-left-color: #0dcaf0; }
+    .insight-icon {
+        font-size: 2rem;
+        line-height: 1;
+    }
+    .header-section {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        border-radius: 16px;
+        color: white;
+        padding: 2rem 2.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Header -->
+<div class="header-section shadow-sm mb-4">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <h2 class="fw-bold mb-1">💡 Improvement Suggestions</h2>
+            <p class="mb-0 opacity-75">Personalized insights based on your activity, habits, and tasks this week.</p>
+        </div>
+        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+            <a href="{% url 'dashboard' %}" class="btn btn-light btn-sm fw-semibold">← Dashboard</a>
+        </div>
+    </div>
+</div>
+
+{% if suggestions %}
+    <div class="row g-3">
+        {% for s in suggestions %}
+            <div class="col-12">
+                <div class="card insight-card shadow-sm border-{{ s.type }}">
+                    <div class="card-body p-4 d-flex align-items-start gap-3">
+                        <div class="insight-icon">{{ s.icon }}</div>
+                        <div>
+                            <h6 class="fw-bold mb-1">{{ s.title }}</h6>
+                            <p class="text-muted mb-0">{{ s.message }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="card border-0 shadow-sm">
+        <div class="card-body text-center py-5">
+            <div class="mb-3" style="font-size: 3rem;">🎉</div>
+            <h5 class="fw-bold">No Suggestions Right Now</h5>
+            <p class="text-muted">Start logging activities, tracking habits, and adding tasks to receive personalized insights!</p>
+            <a href="{% url 'activity_create' %}" class="btn btn-primary fw-semibold">Log an Activity</a>
+        </div>
+    </div>
+{% endif %}
+
+<!-- Quick Links -->
+<div class="text-center mt-4">
+    <a href="{% url 'weekly_report' %}" class="btn btn-outline-primary btn-sm fw-semibold me-2">📊 Weekly Report</a>
+    <a href="{% url 'habit_analysis' %}" class="btn btn-outline-warning btn-sm fw-semibold">🔥 Habit Analysis</a>
+</div>
+
+{% endblock %}
