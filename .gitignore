@@ -1,25 +1,33 @@
 # Python
+*.pyc
 __pycache__/
-*.py[cod]
 *.pyo
-*.pyd
 
 # Virtual Environment
 venv/
+env/
+
+# Environment Variables
 .env
 
-# Django
+# Database
+*.sqlite3
 db.sqlite3
-media/
+
+# Static files (collected)
 staticfiles/
 
-# IDEs
+# Media files (user uploads)
+media/
+
+# IDE
 .vscode/
 .idea/
 
-# OS files
+# OS
 .DS_Store
 Thumbs.db
 
-# Logs
-*.log
+# Gemini
+.gemini/
+.agents/
